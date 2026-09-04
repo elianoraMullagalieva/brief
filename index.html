@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Бриф · Дерзай в дизайн</title>
+<meta name="description" content="Клиентский бриф — семь коротких этапов">
+<meta name="robots" content="noindex">
+<link rel="icon" href="assets/dd-logo.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="#" aria-label="Дерзай в дизайн">
+      <img src="assets/dd-logo.svg" alt="">
+      <span>бриф</span>
+    </a>
+    <span class="step-counter" id="stepCounter" hidden>01 / 07</span>
+  </div>
+  <div class="progress"><div class="progress-fill" id="progressFill"></div></div>
+</header>
+
+<main class="shell">
+
+  <!-- ИНТРО -->
+  <section class="screen is-active" data-screen="intro">
+    <div class="hero">
+      <div class="hero-text">
+        <p class="eyebrow">Перед стартом работы</p>
+        <h1 class="display">Расскажите<br>о своём деле</h1>
+        <p class="lead">Семь коротких блоков. Отвечайте своими словами — без формулировок «для сайта». Чем честнее ответ, тем точнее получится результат.</p>
+        <ul class="facts">
+          <li><span>~15 минут</span>спокойного темпа</li>
+          <li><span>Черновик</span>сохраняется сам</li>
+          <li><span>Можно</span>вернуться и дополнить</li>
+        </ul>
+        <button class="btn btn-primary btn-lg" data-action="start">
+          Начать
+          <svg class="arrow" viewBox="0 0 20 20" aria-hidden="true"><path d="M18.9629 0C19.5354 0.000248588 19.9998 0.465312 20 1.03906V2.54004L18.7461 3.7959C18.7173 3.81763 18.6898 3.84138 18.6641 3.86719L15.8711 6.66602H19.998V20H14.998V7.54102L2.56641 20L0 17.4277L11.9893 5.41211C12.6421 4.75734 12.1795 3.63797 11.2559 3.6377H0.0859375V0H18.9629Z" fill="currentColor"/></svg>
+        </button>
+        <p class="micro">Если закроете вкладку — ответы останутся в этом браузере, ничего не потеряется.</p>
+      </div>
+      <figure class="hero-figure">
+        <img src="assets/elianora-audience.png" alt="Элианора Муллагалиева" loading="eager">
+        <figcaption>
+          <strong>Элианора Муллагалиева</strong>
+          <span>дизайнер · школа AI-креаторов</span>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ЭТАПЫ · генерируются скриптом -->
+  <div id="steps"></div>
+
+  <!-- ФИНАЛ -->
+  <section class="screen" data-screen="done">
+    <div class="thanks">
+      <figure class="thanks-photo">
+        <img src="assets/elianora.png" alt="Элианора Муллагалиева" loading="lazy">
+      </figure>
+      <div class="thanks-text">
+        <div class="done-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M4 12.5 9.5 18 20 6.5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <h1 class="display">Спасибо!</h1>
+        <p class="lead thanks-lead">Я получила ваш бриф и скоро с вами свяжусь.</p>
+        <p class="thanks-note">Прочитаю всё внимательно — особенно про то, где рвутся сделки. Вернусь с вопросами и первым наброском структуры. Обычно это занимает один-два рабочих дня.</p>
+        <div class="thanks-actions">
+          <a class="btn btn-primary" href="https://t.me/derzayvdesign_zabota" target="_blank" rel="noopener noreferrer">
+            Написать в Telegram
+            <svg class="tg" viewBox="0 0 24 24" aria-hidden="true"><path d="m21 3-3.3 17.1a1 1 0 0 1-1.6.6l-5.2-4.1-2.8 2.7a1 1 0 0 1-1.7-.7l-.8-5.1L2.1 12a1 1 0 0 1 .1-1.9L20 2a1 1 0 0 1 1 1ZM7.2 12.1l7.6 2.8 2.1-8.2-9.7 5.4Z"/></svg>
+          </a>
+          <button class="btn btn-ghost" data-action="download">Скачать копию ответов</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-grid">
+      <div class="footer-col footer-brand">
+        <img src="assets/dd-logo.svg" alt="Дерзай в дизайн">
+        <p>школа AI<br>креаторов</p>
+      </div>
+      <nav class="footer-col" aria-label="Документы">
+        <p class="footer-head">Документы</p>
+        <a href="https://derzayvdesign.com/politicaprivacy" target="_blank" rel="noopener noreferrer">Политика конфиденциальности</a>
+        <a href="https://derzayvdesign.com/soglasienaobraborku" target="_blank" rel="noopener noreferrer">Согласие на обработку данных</a>
+        <a href="https://derzayvdesign.com/soglasierassilka" target="_blank" rel="noopener noreferrer">Согласие на рассылку</a>
+        <a href="https://derzayvdesign.com/oferta" target="_blank" rel="noopener noreferrer">Публичная оферта</a>
+      </nav>
+      <aside class="footer-col" aria-label="Отдел заботы">
+        <p class="footer-head">Остались вопросы?</p>
+        <a class="footer-care" href="https://t.me/derzayvdesign_zabota" target="_blank" rel="noopener noreferrer">
+          Написать в отдел заботы
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 3-3.3 17.1a1 1 0 0 1-1.6.6l-5.2-4.1-2.8 2.7a1 1 0 0 1-1.7-.7l-.8-5.1L2.1 12a1 1 0 0 1 .1-1.9L20 2a1 1 0 0 1 1 1ZM7.2 12.1l7.6 2.8 2.1-8.2-9.7 5.4Z"/></svg>
+        </a>
+      </aside>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2026 Нейро-практикум</p>
+      <p>ИП Муллагалиева Элианора Тагировна<br>ИНН 166113484876 · ОГРНИП 320169000034780</p>
+    </div>
+  </div>
+</footer>
+
+<nav class="navbar" id="navbar" hidden>
+  <div class="navbar-inner">
+    <button class="btn btn-ghost" data-action="prev">Назад</button>
+    <div class="dots" id="dots"></div>
+    <button class="btn btn-primary" data-action="next">Далее</button>
+  </div>
+</nav>
+
+<div class="overlay" id="overlay" hidden>
+  <div class="overlay-card">
+    <div class="spinner" aria-hidden="true"></div>
+    <p id="overlayText">Отправляю…</p>
+  </div>
+</div>
+
+<div class="toast" id="toast" hidden></div>
+
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
