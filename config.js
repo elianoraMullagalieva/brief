@@ -7,7 +7,7 @@ window.BRIEF_CONFIG = {
   // Адрес Cloudflare Worker (см. инструкцию, шаг 4).
   // Пока не подставлен — форма работает, но вместо отправки
   // предложит скачать файл с ответами.
-  ENDPOINT: '',
+  ENDPOINT: 'https://cool-credit-7dc0.derzajelianora.workers.dev',
 
   // Заголовок в сообщении Telegram
   PROJECT_NAME: 'Бриф'
