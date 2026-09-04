@@ -2,7 +2,13 @@
    CLOUDFLARE WORKER · приёмник брифа → Telegram
    Токен бота хранится здесь, в секретах Cloudflare,
    и никогда не попадает в код сайта.
+
+   Ответы приходят цепочкой сообщений по этапам —
+   без файла, читаются прямо в ленте.
    ============================================================ */
+
+const TG_LIMIT = 4096;       // жёсткий лимит Telegram
+const CHUNK = 3800;          // с запасом на разметку
 
 export default {
   async fetch(request, env) {
@@ -38,6 +44,20 @@ export default {
 
     const api = m => `https://api.telegram.org/bot${TOKEN}/${m}`;
 
+    const send = async (text) => {
+      const r = await fetch(api('sendMessage'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: CHAT,
+          text: text.slice(0, TG_LIMIT),
+          parse_mode: 'HTML',
+          disable_web_page_preview: true
+        })
+      });
+      return r;
+    };
+
     let form;
     try {
       form = await request.formData();
@@ -46,33 +66,23 @@ export default {
     }
 
     const summary = String(form.get('summary') || 'Новый бриф');
-    const text = String(form.get('text') || '');
-    const project = String(form.get('project') || 'Бриф');
+    const blocks = form.getAll('blocks').map(String).filter(Boolean);
 
-    // 1. Короткая сводка
-    const r1 = await fetch(api('sendMessage'), {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        chat_id: CHAT,
-        text: summary.slice(0, 4000),
-        parse_mode: 'HTML',
-        disable_web_page_preview: true
-      })
-    });
-
+    // 1. Сводка
+    const r1 = await send(summary);
     if (!r1.ok) {
       const detail = await r1.text();
       return json({ error: 'telegram sendMessage failed', detail }, 502, cors);
     }
 
-    // 2. Полные ответы отдельным файлом (обходит лимит 4096 символов)
-    const stamp = new Date().toISOString().slice(0, 16).replace(/[:T]/g, '-');
-    const doc = new FormData();
-    doc.append('chat_id', CHAT);
-    doc.append('caption', `Полные ответы · ${project}`);
-    doc.append('document', new Blob([text], { type: 'text/plain;charset=utf-8' }), `brief-${stamp}.txt`);
-    await fetch(api('sendDocument'), { method: 'POST', body: doc });
+    // 2. Этапы — каждый своим сообщением, длинные режутся по абзацам
+    let sent = 1;
+    for (const block of blocks) {
+      for (const part of split(block)) {
+        await send(part);
+        sent++;
+      }
+    }
 
     // 3. Приложенные файлы
     const attachments = form.getAll('files').filter(f => f && typeof f === 'object' && f.size);
@@ -83,17 +93,57 @@ export default {
       fd.append('document', f, f.name);
       const rf = await fetch(api('sendDocument'), { method: 'POST', body: fd });
       if (!rf.ok) {
-        await fetch(api('sendMessage'), {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ chat_id: CHAT, text: `⚠️ Не удалось передать файл: ${f.name}` })
-        });
+        await send(`⚠️ Не удалось передать файл: ${escapeHtml(f.name)}`);
       }
     }
 
-    return json({ ok: true, files: attachments.length }, 200, cors);
+    return json({ ok: true, messages: sent, files: attachments.length }, 200, cors);
   }
 };
+
+/* Режет длинный блок по абзацам, чтобы не рвать текст посреди фразы */
+function split(text) {
+  if (text.length <= CHUNK) return [text];
+
+  const parts = [];
+  let buf = '';
+
+  for (const para of text.split('\n\n')) {
+    if ((buf + '\n\n' + para).length > CHUNK) {
+      if (buf) parts.push(buf);
+      // абзац сам по себе длиннее лимита — режем по строкам
+      if (para.length > CHUNK) {
+        let line = '';
+        for (const l of para.split('\n')) {
+          if ((line + '\n' + l).length > CHUNK) {
+            if (line) parts.push(line);
+            // строка длиннее лимита — рубим по символам, ничего не теряя
+            let rest = l;
+            while (rest.length > CHUNK) {
+              parts.push(rest.slice(0, CHUNK));
+              rest = rest.slice(CHUNK);
+            }
+            line = rest;
+          } else {
+            line = line ? line + '\n' + l : l;
+          }
+        }
+        buf = line;
+      } else {
+        buf = para;
+      }
+    } else {
+      buf = buf ? buf + '\n\n' + para : para;
+    }
+  }
+
+  if (buf) parts.push(buf);
+  return parts;
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+}
 
 function json(obj, status, headers) {
   return new Response(JSON.stringify(obj), {

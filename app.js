@@ -379,6 +379,37 @@ function buildText() {
   return lines.join('\n');
 }
 
+/* Один этап = одно сообщение в Telegram. Вопросы жирным, ответы обычным. */
+function buildBlocks() {
+  var out = [];
+
+  STEPS.forEach(function (step, i) {
+    var parts = ['<b>' + pad(i + 1) + ' · ' + esc(step.title.toUpperCase()) + '</b>', ''];
+    var filled = 0;
+
+    step.fields.forEach(function (f) {
+      if (f.type === 'files' || f.type === 'consent') return;
+      var el = document.getElementById('f-' + f.id);
+      var v = el ? el.value.trim() : '';
+      if (!v) return;                       // пустые вопросы не засоряют ленту
+      filled++;
+      parts.push('<b>' + esc(f.label) + '</b>');
+      parts.push(esc(v));
+      parts.push('');
+    });
+
+    if (filled) out.push(parts.join('\n').trim());
+  });
+
+  if (files.length) {
+    var fl = ['<b>ФАЙЛЫ (' + files.length + ')</b>', ''];
+    files.forEach(function (f) { fl.push('• ' + esc(f.name) + ' — ' + fmtSize(f.size)); });
+    out.push(fl.join('\n'));
+  }
+
+  return out;
+}
+
 function buildSummary() {
   var name = (document.getElementById('f-n1') || {}).value || '';
   var comp = (document.getElementById('f-n2') || {}).value || '';
@@ -387,16 +418,16 @@ function buildSummary() {
   var action = (document.getElementById('f-b2') || {}).value || '';
   var breaks = (document.getElementById('f-s4') || {}).value || '';
 
-  var s = '🗂 <b>' + esc(CFG().PROJECT_NAME) + '</b>\n\n';
+  var s = '🗂 <b>НОВЫЙ БРИФ</b>\n\n';
   if (name.trim()) s += '👤 ' + esc(name.trim()) + '\n';
   if (comp.trim()) s += '🏢 ' + esc(comp.trim()) + '\n';
   if (contact.trim()) s += '📮 ' + esc(contact.trim()) + '\n';
   s += '\n';
-  if (task.trim()) s += '<b>Зачем сайт:</b>\n' + esc(cut(task, 300)) + '\n\n';
-  if (action.trim()) s += '<b>Целевое действие:</b>\n' + esc(cut(action, 200)) + '\n\n';
-  if (breaks.trim()) s += '<b>Где рвутся сделки:</b>\n' + esc(cut(breaks, 400)) + '\n\n';
-  s += '📄 Полные ответы — в файле ниже.';
-  if (files.length) s += '\n📎 Приложено файлов: ' + files.length;
+  if (task.trim()) s += '<b>Зачем сайт:</b>\n' + esc(cut(task, 250)) + '\n\n';
+  if (action.trim()) s += '<b>Целевое действие:</b>\n' + esc(cut(action, 150)) + '\n\n';
+  if (breaks.trim()) s += '<b>⚠️ Где рвутся сделки:</b>\n' + esc(cut(breaks, 350)) + '\n\n';
+  s += '👇 Все ответы — следующими сообщениями';
+  if (files.length) s += '\n📎 Файлов: ' + files.length;
   return s;
 }
 
@@ -436,8 +467,8 @@ function submit() {
 
   var fd = new FormData();
   fd.append('summary', buildSummary());
-  fd.append('text', text);
   fd.append('project', CFG().PROJECT_NAME);
+  buildBlocks().forEach(function (b) { fd.append('blocks', b); });
   files.forEach(function (f) { fd.append('files', f, f.name); });
 
   overlay(true, 'Отправляю…');
