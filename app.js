@@ -468,6 +468,9 @@ function submit() {
   var fd = new FormData();
   fd.append('summary', buildSummary());
   fd.append('project', CFG().PROJECT_NAME);
+  // Шлём оба формата: новый воркер разложит blocks сообщениями,
+  // старый — отправит text одним файлом. Ответы не потеряются в любом случае.
+  fd.append('text', text);
   buildBlocks().forEach(function (b) { fd.append('blocks', b); });
   files.forEach(function (f) { fd.append('files', f, f.name); });
 
