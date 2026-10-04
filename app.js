@@ -356,9 +356,24 @@ function renderFiles() {
 
 function buildText() {
   var lines = [];
-  lines.push('НОВЫЙ БРИФ');
+  var val = function (id) {
+    var el = document.getElementById('f-' + id);
+    return el ? el.value.trim() : '';
+  };
+
+  // Шапка: кто прислал и как связаться — сразу наверху, чтобы не искать в конце
+  lines.push(CFG().PROJECT_NAME.toUpperCase());
   lines.push(new Date().toLocaleString('ru-RU'));
   lines.push('');
+
+  var who = [];
+  if (val('n1')) who.push('Имя: ' + val('n1'));
+  if (val('n2')) who.push('Компания: ' + val('n2'));
+  if (val('n3')) who.push('Контакт: ' + val('n3'));
+  if (who.length) {
+    lines = lines.concat(who);
+    lines.push('');
+  }
 
   STEPS.forEach(function (step, i) {
     lines.push('══════════════════════════');
@@ -367,8 +382,7 @@ function buildText() {
     lines.push('');
     step.fields.forEach(function (f) {
       if (f.type === 'files' || f.type === 'consent') return;
-      var el = document.getElementById('f-' + f.id);
-      var v = el ? el.value.trim() : '';
+      var v = val(f.id);
       lines.push('▸ ' + f.label);
       lines.push(v || '— не заполнено —');
       lines.push('');
@@ -377,8 +391,9 @@ function buildText() {
 
   if (files.length) {
     lines.push('══════════════════════════');
-    lines.push('ФАЙЛЫ (' + files.length + ')');
+    lines.push('ПРИЛОЖЕННЫЕ ФАЙЛЫ (' + files.length + ')');
     lines.push('══════════════════════════');
+    lines.push('');
     files.forEach(function (f) { lines.push('• ' + f.name + ' — ' + fmtSize(f.size)); });
     lines.push('');
   }
@@ -433,7 +448,7 @@ function buildSummary() {
   if (task.trim()) s += '<b>Зачем сайт:</b>\n' + esc(cut(task, 250)) + '\n\n';
   if (action.trim()) s += '<b>Целевое действие:</b>\n' + esc(cut(action, 150)) + '\n\n';
   if (breaks.trim()) s += '<b>⚠️ Где рвутся сделки:</b>\n' + esc(cut(breaks, 350)) + '\n\n';
-  s += '👇 Все ответы — следующими сообщениями';
+  s += '📄 Все ответы — в файле ниже';
   if (files.length) s += '\n📎 Файлов: ' + files.length;
   return s;
 }
@@ -475,10 +490,9 @@ function submit() {
   var fd = new FormData();
   fd.append('summary', buildSummary());
   fd.append('project', CFG().PROJECT_NAME);
-  // Шлём оба формата: новый воркер разложит blocks сообщениями,
-  // старый — отправит text одним файлом. Ответы не потеряются в любом случае.
+  // Только text — воркер пришлёт один файл со всеми ответами.
+  // Дробление на сообщения убрано: на заявку приходит сводка + один файл.
   fd.append('text', text);
-  buildBlocks().forEach(function (b) { fd.append('blocks', b); });
   files.forEach(function (f) { fd.append('files', f, f.name); });
 
   overlay(true, 'Отправляю…');
